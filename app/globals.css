@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fff7ed;
+  --foreground: #1f2937;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: #ff6f61;
+  --color-secondary: #a8e6cf;
+  --color-surface: #ffffff;
+  --font-sans: "Inter", "Segoe UI", sans-serif;
+  --font-mono: "Fira Code", "SFMono-Regular", Menlo, monospace;
+}
+
+* {
+  @apply border-zinc-200;
+}
+
+body {
+  @apply bg-background text-foreground font-sans;
+}

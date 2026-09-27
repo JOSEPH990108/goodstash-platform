@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: goodstash-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: goodstash
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - goodstash-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  goodstash-postgres-data:
