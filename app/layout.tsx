@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 import { getBrandConfig } from "@/lib/brand";
 
@@ -13,7 +14,7 @@ export function generateMetadata(): Metadata {
   };
 }
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-background text-foreground">{children}</body>
