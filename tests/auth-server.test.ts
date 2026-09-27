@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const betterAuthMock = vi.fn((options) => options);
 const drizzleAdapterMock = vi.fn<
-  (db: unknown, config: { schema: Record<string, unknown> }) => unknown
+  (
+    db: unknown,
+    config: { provider: string; schema: Record<string, unknown> },
+  ) => unknown
 >(() => vi.fn());
 
 vi.mock("better-auth", () => ({
@@ -34,6 +37,7 @@ describe("auth server foundation", () => {
     const adapterConfig = adapterCall?.[1];
 
     expect(adapterConfig).toBeDefined();
+    expect(adapterConfig?.provider).toBe("pg");
     expect(adapterConfig?.schema).toBeDefined();
 
     expect(adapterConfig?.schema).toMatchObject({
@@ -47,6 +51,8 @@ describe("auth server foundation", () => {
       expect.objectContaining({
         appName: "GoodStash",
         baseURL: "http://localhost:3000",
+        secret: "test-secret",
+        socialProviders: {},
       }),
     );
   });

@@ -1,13 +1,11 @@
 import { PageShell } from "@/components/page-shell";
 
 type RecommendationPageProps = {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 };
 
-export default async function RecommendationDetailPage({
-  params,
-}: RecommendationPageProps) {
-  const { slug } = await params;
+export default function RecommendationDetailPage({ params }: RecommendationPageProps) {
+  const { slug } = params;
 
   return (
     <PageShell

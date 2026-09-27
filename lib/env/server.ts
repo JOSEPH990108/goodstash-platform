@@ -10,14 +10,8 @@ const serverEnvSchema = z.object({
 
 type ServerEnv = z.infer<typeof serverEnvSchema> & ReturnType<typeof getSharedEnv>;
 
-let cachedServerEnv: ServerEnv | null = null;
-
 export function getServerEnv(): ServerEnv {
-  if (cachedServerEnv) {
-    return cachedServerEnv;
-  }
-
-  cachedServerEnv = {
+  return {
     ...getSharedEnv(),
     ...serverEnvSchema.parse({
       DATABASE_URL: process.env.DATABASE_URL,
@@ -25,6 +19,4 @@ export function getServerEnv(): ServerEnv {
       BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     }),
   };
-
-  return cachedServerEnv;
 }
