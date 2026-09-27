@@ -41,6 +41,7 @@ src/modules/
 
 ## Environment variables
 Create `.env` from `.env.example`.
+Environment files are intentionally gitignored (except `.env.example`) and should not be committed.
 
 - `NEXT_PUBLIC_BRAND_NAME` (`GoodStash` or `GoodStuff`)
 - `DATABASE_URL`
