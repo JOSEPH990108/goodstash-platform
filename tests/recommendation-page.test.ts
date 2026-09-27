@@ -4,9 +4,13 @@ import { describe, expect, it } from "vitest";
 import RecommendationDetailPage from "@/app/recommendations/[slug]/page";
 
 describe("recommendation detail route shell", () => {
-  it("renders the slug in the route heading", () => {
+  it("renders the slug in the route heading", async () => {
+    const page = await RecommendationDetailPage({
+      params: Promise.resolve({ slug: "ergonomic-mouse" }),
+    });
+
     const html = renderToStaticMarkup(
-      RecommendationDetailPage({ params: { slug: "ergonomic-mouse" } }),
+      page,
     );
 
     expect(html).toContain("Recommendation: ergonomic-mouse");

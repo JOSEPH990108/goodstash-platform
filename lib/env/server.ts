@@ -3,12 +3,9 @@ import { z } from "zod";
 import { getSharedEnv } from "./shared";
 
 const serverEnvSchema = z.object({
-  DATABASE_URL: z
-    .string()
-    .min(1)
-    .default("postgresql://postgres:postgres@localhost:5432/goodstash"),
-  BETTER_AUTH_SECRET: z.string().min(1).default("change-me-in-production"),
-  BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
+  DATABASE_URL: z.string().url(),
+  BETTER_AUTH_SECRET: z.string().min(1),
+  BETTER_AUTH_URL: z.string().url(),
 });
 
 type ServerEnv = z.infer<typeof serverEnvSchema> & ReturnType<typeof getSharedEnv>;
