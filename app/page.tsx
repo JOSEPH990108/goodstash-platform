@@ -16,7 +16,7 @@ export default function HomePage() {
       title="Curated product discovery"
       description="Sprint 0 foundation for GoodStash. Core routes and platform modules are in place for future Phase 1 feature delivery."
     >
-      <nav className="grid gap-3 sm:grid-cols-2">
+      <nav aria-label="Primary platform sections" className="grid gap-3 sm:grid-cols-2">
         {routes.map((route) => (
           <Link
             key={route.href}

@@ -13,7 +13,12 @@ export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema,
+    schema: {
+      account: schema.authAccounts,
+      session: schema.authSessions,
+      user: schema.authUsers,
+      verification: schema.authVerifications,
+    },
   }),
   socialProviders: {},
 });

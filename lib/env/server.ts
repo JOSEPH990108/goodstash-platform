@@ -6,7 +6,7 @@ const serverEnvSchema = z.object({
   DATABASE_URL: z
     .string()
     .min(1)
-    .default("******localhost:5432/goodstash"),
+    .default("postgresql://postgres:postgres@localhost:5432/goodstash"),
   BETTER_AUTH_SECRET: z.string().min(1).default("change-me-in-production"),
   BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
 });
