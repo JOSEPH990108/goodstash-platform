@@ -5,6 +5,7 @@
 Phase 1 should be implemented as a **modular monolith**.
 
 Recommended baseline:
+
 - Next.js App Router
 - React
 - TypeScript strict mode
@@ -85,8 +86,11 @@ erDiagram
 ## Core schema v0.1
 
 ### `users`
+
 Proposed:
+
 - `id uuid PK`
+- `auth_user_id text UNIQUE FK -> auth_users.id`
 - `name text`
 - `avatar_url text nullable`
 - `role enum(USER, ADMIN)`
@@ -96,6 +100,7 @@ Proposed:
 Auth library may own provider/account/session/verification tables.
 
 ### `brands`
+
 - `id uuid PK`
 - `name varchar(160)`
 - `slug varchar(180) UNIQUE`
@@ -104,6 +109,7 @@ Auth library may own provider/account/session/verification tables.
 - timestamps
 
 ### `products`
+
 - `id uuid PK`
 - `brand_id nullable FK`
 - `name varchar(220)`
@@ -112,12 +118,15 @@ Auth library may own provider/account/session/verification tables.
 - `status enum(DRAFT, ACTIVE, ARCHIVED)`
 - timestamps
 
+Products are canonical records. Marketplace-specific identifiers and external destination URLs belong to Product Links, not Products.
+
 Product has no cart/order/payment fields.
 
 ### `recommendations`
+
 - `id uuid PK`
 - `product_id FK`
-- `author_user_id FK`
+- `author_user_id FK -> users.id`
 - `slug varchar(240) UNIQUE`
 - `headline varchar(220)`
 - `summary text`
@@ -132,6 +141,7 @@ Product has no cart/order/payment fields.
 - timestamps
 
 ### `categories`
+
 - `id uuid PK`
 - `name`
 - `slug UNIQUE`
@@ -140,21 +150,27 @@ Product has no cart/order/payment fields.
 - `status`
 
 ### `recommendation_categories`
+
 Composite key:
+
 - `recommendation_id`
 - `category_id`
 
 ### `tags`
+
 - `id uuid PK`
 - `name`
 - `slug UNIQUE`
 
 ### `recommendation_tags`
+
 Composite key:
+
 - `recommendation_id`
 - `tag_id`
 
 ### `marketplaces`
+
 - `id uuid PK`
 - `name`
 - `slug UNIQUE`
@@ -163,6 +179,7 @@ Composite key:
 - `sort_order`
 
 ### `product_links`
+
 - `id uuid PK`
 - `product_id FK`
 - `marketplace_id FK`
@@ -178,6 +195,7 @@ Composite key:
 - timestamps
 
 ### `favorites`
+
 - `id uuid PK`
 - `user_id FK`
 - `recommendation_id FK`
@@ -187,7 +205,9 @@ Composite key:
 Favorite targets Recommendation, not Product.
 
 ### `media_assets`
+
 Proposed Phase 1 shape:
+
 - `id uuid PK`
 - `owner_type enum(PRODUCT, RECOMMENDATION)`
 - `owner_id uuid`
@@ -206,6 +226,7 @@ If polymorphic ownership becomes awkward in Drizzle/PostgreSQL integrity, normal
 ### Analytics tables
 
 `product_views`
+
 - recommendation_id
 - optional user/anonymous/session context
 - referrer
@@ -213,6 +234,7 @@ If polymorphic ownership becomes awkward in Drizzle/PostgreSQL integrity, normal
 - metadata
 
 `click_events`
+
 - product_link_id
 - optional recommendation_id
 - optional user/anonymous/session context
@@ -221,6 +243,7 @@ If polymorphic ownership becomes awkward in Drizzle/PostgreSQL integrity, normal
 - metadata
 
 `search_events`
+
 - query
 - result_count
 - optional user/anonymous context
@@ -248,8 +271,10 @@ If polymorphic ownership becomes awkward in Drizzle/PostgreSQL integrity, normal
 The launch provider mix is open (`AUTH-01`).
 
 Architecture requirements:
+
 - Better Auth (or agreed auth layer) can manage identity/session/provider tables
-- application `users` profile carries business role/status
+- application `users` profile carries business role/status and maps one-to-one to Better Auth through unique `auth_user_id`
+- auth provider identity remains provider-agnostic; app profiles must not duplicate auth identity by email alone
 - Admin authorization is checked server-side
 - hiding an Admin button is never considered authorization
 - suspended users cannot perform protected actions
@@ -260,6 +285,7 @@ Architecture requirements:
 Phase 1 search remains in PostgreSQL.
 
 Baseline:
+
 - indexed published Recommendation/Product text
 - title/brand exact-match weighting
 - full-text search
@@ -281,6 +307,7 @@ Public search must never leak drafts.
 7. redirect with appropriate HTTP response
 
 Security:
+
 - never accept arbitrary target URL from query string and redirect blindly
 - prevent open redirect behaviour
 - do not log secret/credential URL data
@@ -290,6 +317,7 @@ Security:
 ## Media
 
 Preferred flow:
+
 1. Admin requests upload intent
 2. server validates metadata and permission
 3. upload to S3-compatible storage using signed URL or controlled upload endpoint
@@ -302,6 +330,7 @@ Store alt text and dimensions.
 ## Analytics event taxonomy
 
 Canonical events:
+
 - `recommendation_view`
 - `favorite_attempt`
 - `favorite_saved`
@@ -322,42 +351,47 @@ Exclude known bots/prefetch where feasible.
 
 Representative contracts:
 
-| Contract | Access | Purpose |
-|---|---|---|
-| `GET /api/search` | Public | Search published Recommendations |
-| `POST /api/favorites` | User | Idempotent Save |
-| `DELETE /api/favorites/[recommendationId]` | User | Unsave |
-| `GET /go/[code]` | Public | Track + redirect |
-| `POST /api/admin/recommendations` | Admin | Create draft |
-| `PATCH /api/admin/recommendations/[id]` | Admin | Update |
-| `POST /api/admin/recommendations/[id]/publish` | Admin | Validate + publish |
-| `POST /api/admin/media/upload-intent` | Admin | Upload intent |
-| `PATCH /api/admin/product-links/[id]` | Admin | Edit/disable link |
-| `GET /api/admin/analytics/summary` | Admin | Dashboard aggregates |
+| Contract                                       | Access | Purpose                          |
+| ---------------------------------------------- | ------ | -------------------------------- |
+| `GET /api/search`                              | Public | Search published Recommendations |
+| `POST /api/favorites`                          | User   | Idempotent Save                  |
+| `DELETE /api/favorites/[recommendationId]`     | User   | Unsave                           |
+| `GET /go/[code]`                               | Public | Track + redirect                 |
+| `POST /api/admin/recommendations`              | Admin  | Create draft                     |
+| `PATCH /api/admin/recommendations/[id]`        | Admin  | Update                           |
+| `POST /api/admin/recommendations/[id]/publish` | Admin  | Validate + publish               |
+| `POST /api/admin/media/upload-intent`          | Admin  | Upload intent                    |
+| `PATCH /api/admin/product-links/[id]`          | Admin  | Edit/disable link                |
+| `GET /api/admin/analytics/summary`             | Admin  | Dashboard aggregates             |
 
 Next.js Server Actions may be used for same-origin form commands. Domain services/validation should remain reusable so future mobile clients are possible.
 
 ## SEO/rendering
 
 ### Recommendation detail
+
 - server-render metadata
 - canonical URL
 - Open Graph metadata/image
 - structured data only when semantically accurate
 
 ### Home/Discover/Category
+
 - cache/revalidate read-heavy sections
 - invalidate after relevant publish/archive/feature changes
 
 ### Favorites/Account/Admin
+
 - dynamic authenticated rendering
 - no public indexing
 
 ### Search
+
 - dynamic
 - generally noindex query result pages for Phase 1
 
 ### Sitemap
+
 Generate from published Recommendation/category URLs.
 
 ## Security baseline
@@ -377,6 +411,7 @@ Generate from published Recommendation/category URLs.
 ## Environments
 
 At minimum:
+
 - Local
 - Preview / branch deployment
 - Staging or equivalent non-prod integration environment

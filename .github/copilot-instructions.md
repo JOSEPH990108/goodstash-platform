@@ -1,263 +1,21 @@
-# GoodStash Platform — Copilot Instructions
+# GoodStash Repository Instructions
 
-These instructions apply to all GitHub Copilot coding work in this repository.
+Treat `/docs` as the product and engineering source of truth. Before meaningful work, read `docs/README.md` and the relevant design, architecture, backlog, and implementation documents. Resolve conflicts explicitly instead of inventing product decisions.
 
-GoodStash is a commercial **curated product discovery and recommendation platform**.
+Implement only the story assigned to the active sprint. Do not start later-sprint behavior or Phase 2 scope without explicit approval. Follow `AGENTS.md` for installed Next.js-specific guidance.
 
-The working brand is **GoodStash**.  
-**GoodStuff** remains an alternate retained public name.
+Repository-wide domain rules:
 
-Before making meaningful changes, read:
+- Product is the canonical real-world product; Recommendation is separate editorial content and references Product.
+- Favorites target Recommendations only. Marketplace destinations belong to ProductLinks, not Products.
+- Commerce remains external; an outbound click is not a purchase.
+- Keep business logic outside route/UI layers and enforce trusted decisions server-side.
+- Keep `NEXT_PUBLIC_BRAND_NAME` configurable through the central brand/environment layer.
+- Validate trust-boundary input, keep secrets out of source/logs, and never expose internal errors to users.
+- Schema changes require reviewed, forward-safe Drizzle migrations and automated tests for changed behavior.
 
-1. this file
-2. `docs/README.md`
-3. the relevant files under `/docs`
+Use the quality gates and task-specific conventions in `docs/08-implementation-playbook.md`. Keep changes scoped to the active story; update documentation when a contract changes.
 
-Treat `/docs` as the product and engineering source of truth.
-
----
-
-# 1. Source-of-Truth Precedence
-
-Different documents own different decisions.
-
-Use this order by concern:
-
-1. **Business scope and rules** → `docs/02-brd.md`
-2. **Product behaviour and acceptance requirements** → `docs/03-prd.md`
-3. **Navigation and end-to-end flows** → `docs/04-sitemap-user-flows.md`
-4. **UI and visual behaviour** → `docs/05-design-system.md`
-5. **Architecture/data/security contracts** → `docs/06-technical-architecture.md`
-6. **Delivery priority and sprint assignment** → `docs/07-development-backlog.md`
-7. **Engineering workflow and quality gates** → `docs/08-implementation-playbook.md`
-
-If two documents appear to conflict:
-
-- do **not** silently choose one
-- do **not** invent a compromise
-- report the conflict clearly
-- preserve current behaviour until the Product Owner resolves it when possible
-
----
-
-# 2. Current Product Phase
-
-The repository is currently implementing **Phase 1**.
-
-Phase 1 is:
-
-> **Owner-curated product discovery**
-
-Only authorised Admin/Product Owner users can create and publish recommendation content.
-
-External users can:
-
-- browse
-- search
-- view recommendations
-- save recommendations after authentication
-- leave the platform through external marketplace links
-
-Do not implement Phase 2/community scope unless explicitly requested.
-
----
-
-# 3. Non-Negotiable Domain Rules
-
-## Product and Recommendation are separate
-
-`Product` is the canonical real-world product record.
-
-`Recommendation` is editorial/curated content linked to a Product.
-
-A future Product may have multiple Recommendations.
-
-Never collapse these concepts into one table/model/entity for convenience.
-
-Conceptually:
-
-```text
-Product
-   │
-   ├── Recommendation A
-   ├── Recommendation B
-   └── Recommendation C
-```
-
-The exact foreign-key/property name may follow the repository's naming conventions, but the domain relationship must remain.
-
-## Favorites target Recommendations
-
-In Phase 1:
-
-```text
-User → Favorite → Recommendation
-```
-
-Do not change Favorites to Product-level saving unless the Product Owner changes the requirement.
-
-Favorite creation must be idempotent.
-
-## Commerce stays external
-
-GoodStash does not own:
-
-- checkout
-- payment
-- orders
-- shipping
-- refunds
-- affiliate payouts
-
-External marketplace navigation must remain explicit.
-
-## Outbound click is not a purchase
-
-Never report or store a marketplace click as a completed purchase unless actual verified purchase data is later integrated.
-
----
-
-# 4. Phase 1 Features Allowed
-
-Current Phase 1 domains include:
-
-- auth foundation
-- users
-- brands
-- products
-- recommendations
-- categories
-- tags
-- marketplaces
-- product links
-- favorites
-- media
-- search
-- analytics
-- admin CMS
-- public discovery
-- SEO
-- tracked outbound redirect
-
-Implement only the story/scope currently assigned by the active sprint.
-
----
-
-# 5. Phase 1 Features Explicitly Prohibited
-
-Do not introduce any of the following without explicit Product Owner approval:
-
-- user-generated recommendations
-- creator onboarding/profile systems
-- social graphs
-- follows
-- comments
-- public likes
-- messaging/chat
-- internal cart
-- internal checkout
-- payment gateway
-- orders
-- shipping/fulfilment
-- refund workflows
-- affiliate commission ledger
-- creator revenue sharing
-- payout system
-- wallet
-- cashback
-- loyalty points
-- native iOS application
-- native Android application
-- advanced AI recommendation engine
-
-Do not add scaffolding, tables, APIs, UI or dependencies for these features "for future use" unless current documentation explicitly requires it.
-
----
-
-# 6. Brand Rules
-
-The public name is intentionally configurable.
-
-Current working value:
-
-```text
-GoodStash
-```
-
-Retained alternate:
-
-```text
-GoodStuff
-```
-
-Use the central brand configuration/environment layer.
-
-Expected environment input:
-
-```env
-NEXT_PUBLIC_BRAND_NAME=GoodStash
-```
-
-Do not scatter literal `GoodStash` strings throughout feature components.
-
-A future change to:
-
-```env
-NEXT_PUBLIC_BRAND_NAME=GoodStuff
-```
-
-must not require broad refactoring.
-
-Do not change the GoodStash visual identity merely because the alternate name remains open.
-
----
-
-# 7. Architecture
-
-This repository is a **modular monolith**.
-
-Current structural intent:
-
-```text
-app/*             → Next.js routes/pages/API handlers
-src/modules/*     → domain/business modules
-lib/*             → shared infrastructure and cross-cutting utilities
-components/*      → shared UI
-```
-
-Rules:
-
-- keep route handlers/pages thin
-- keep business/domain logic under modules/services
-- do not place complex database/business logic directly in React components
-- do not duplicate business rules across route handlers
-- shared infrastructure belongs in `lib/*`
-- do not create microservices during Phase 1
-- do not reorganise the whole repository just to follow personal style preferences
-
----
-
-# 8. Next.js / React Practices
-
-Use the App Router.
-
-Prefer Server Components for:
-
-- public read-heavy pages
-- metadata generation
-- initial data loading
-
-Use Client Components only when needed for:
-
-- interactive state
-- client-only APIs
-- optimistic mutations
-- forms/components requiring browser state
-
-Rules:
-
-- keep client boundaries small
-- avoid unnecessary `"use client"`
 - use loading/error/not-found states intentionally
 - public metadata should be generated server-side
 - authenticated/private pages must not be indexed
@@ -826,6 +584,7 @@ Implement this slice before unrelated enhancements.
 Do not silently finalise these decisions:
 
 ## BRAND-01
+
 ```text
 GoodStash vs GoodStuff
 ```
@@ -833,9 +592,11 @@ GoodStash vs GoodStuff
 Working value: `GoodStash`.
 
 ## AUTH-01
+
 Launch authentication provider combination.
 
 Possible options:
+
 - Google OAuth
 - Email
 - Mobile OTP
