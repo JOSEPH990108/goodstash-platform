@@ -19,6 +19,9 @@ BEGIN
 	) THEN
 		RAISE EXCEPTION 'A Product destination has no marketplace or URL; resolve it before creating ProductLinks.';
 	END IF;
+	IF EXISTS (SELECT 1 FROM "products" WHERE "is_active" = false) THEN
+		RAISE EXCEPTION 'Inactive Product state cannot be mapped safely to DRAFT or ARCHIVED; resolve before migration.';
+	END IF;
 	IF EXISTS (
 		SELECT 1 FROM "product_categories" AS association
 		LEFT JOIN "recommendations" AS recommendation
