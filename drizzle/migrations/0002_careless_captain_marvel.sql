@@ -5,7 +5,7 @@ BEGIN
 	END IF;
 END $$;
 --> statement-breakpoint
-ALTER TABLE "product_links" ALTER COLUMN "display_price" SET DATA TYPE numeric(12, 2);--> statement-breakpoint
+ALTER TABLE "product_links" ALTER COLUMN "display_price" SET DATA TYPE numeric(12, 2) USING "display_price"::numeric(12, 2);--> statement-breakpoint
 ALTER TABLE "products" ADD COLUMN "status" varchar(20) DEFAULT 'ACTIVE' NOT NULL;--> statement-breakpoint
 ALTER TABLE "recommendations" ADD COLUMN "status" varchar(20) DEFAULT 'DRAFT' NOT NULL;--> statement-breakpoint
 ALTER TABLE "products" DROP COLUMN "is_active";--> statement-breakpoint
