@@ -24,6 +24,7 @@ This folder is the repository-level source of truth for the Phase 1 product.
 | `06-technical-architecture.md` | Architecture, data model, APIs, analytics and security |
 | `07-development-backlog.md` | Epics, stories, priorities, dependencies and sprint sequence |
 | `08-implementation-playbook.md` | Engineering workflow, migrations, testing, CI/CD and DoD |
+| `09-sprint-0-external-verification.md` | Manual Preview/Staging verification checklist |
 
 ## Source-of-truth rules
 

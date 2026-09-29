@@ -197,8 +197,10 @@ Separate essential bootstrap data (e.g. marketplaces/taxonomy) from demo content
 
 ## Authentication/authorization
 
-- final provider mix closes before Sprint 3
-- business role/status belongs to app domain
+- Sprint 1 establishes the provider-agnostic session boundary, application role/status model, and server-protected Admin routes/actions required for Admin authoring.
+- Sprint 3 adds consumer authentication UX, account/profile behavior, and Guest Save continuation without changing the provider boundary.
+- final launch provider mix closes before consumer authentication implementation is finalized
+- business role/status belongs to the app domain
 - every Admin action performs server-side authorization
 - protected actions re-check account status/session
 - route middleware can improve UX but does not replace domain authorization
