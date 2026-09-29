@@ -8,6 +8,27 @@
       "when": 1790498535662,
       "tag": "0000_curious_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790601267761,
+      "tag": "0001_lethal_vance_astro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790601379854,
+      "tag": "0002_careless_captain_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790602012732,
+      "tag": "0003_freezing_rhino",
+      "breakpoints": true
     }
   ]
 }

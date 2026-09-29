@@ -4,6 +4,7 @@ import {
   check,
   integer,
   jsonb,
+  numeric,
   pgTable,
   text,
   timestamp,
@@ -13,13 +14,20 @@ import {
 } from "drizzle-orm/pg-core";
 
 const timestamps = {
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 };
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
-  email: varchar("email", { length: 320 }).notNull().unique(),
+  authUserId: text("auth_user_id")
+    .notNull()
+    .unique()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
   displayName: varchar("display_name", { length: 120 }),
   ...timestamps,
 });
@@ -57,8 +65,12 @@ export const authAccounts = pgTable("auth_accounts", {
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
+  accessTokenExpiresAt: timestamp("access_token_expires_at", {
+    withTimezone: true,
+  }),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+    withTimezone: true,
+  }),
   scope: text("scope"),
   password: text("password"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
@@ -96,61 +108,112 @@ export const marketplaces = pgTable("marketplaces", {
   ...timestamps,
 });
 
-export const products = pgTable("products", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  marketplaceId: uuid("marketplace_id").references(() => marketplaces.id),
-  externalId: varchar("external_id", { length: 150 }),
-  slug: varchar("slug", { length: 150 }).notNull().unique(),
-  title: text("title").notNull(),
-  description: text("description"),
-  canonicalUrl: text("canonical_url").notNull(),
-  isActive: boolean("is_active").default(true).notNull(),
-  ...timestamps,
-});
-
-export const recommendations = pgTable("recommendations", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  productId: uuid("product_id")
-    .notNull()
-    .references(() => products.id, { onDelete: "cascade" }),
-  slug: varchar("slug", { length: 180 }).notNull().unique(),
-  headline: text("headline").notNull(),
-  summary: text("summary"),
-  editorialNotes: text("editorial_notes"),
-  publishedAt: timestamp("published_at", { withTimezone: true }),
-  ...timestamps,
-});
-
-export const productCategories = pgTable(
-  "product_categories",
+export const products = pgTable(
+  "products",
   {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: varchar("slug", { length: 150 }).notNull().unique(),
+    title: text("title").notNull(),
+    description: text("description"),
+    status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+    ...timestamps,
+  },
+  (table) => ({
+    statusCheck: check(
+      "products_status_check",
+      sql`${table.status} IN ('DRAFT', 'ACTIVE', 'ARCHIVED')`,
+    ),
+  }),
+);
+
+export const recommendations = pgTable(
+  "recommendations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
+    authorUserId: uuid("author_user_id")
+      .notNull()
+      .references(() => users.id),
+    slug: varchar("slug", { length: 180 }).notNull().unique(),
+    headline: text("headline").notNull(),
+    summary: text("summary"),
+    editorialNotes: text("editorial_notes"),
+    status: varchar("status", { length: 20 }).default("DRAFT").notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => ({
+    statusCheck: check(
+      "recommendations_status_check",
+      sql`${table.status} IN ('DRAFT', 'PUBLISHED', 'ARCHIVED')`,
+    ),
+  }),
+);
+
+export const recommendationCategories = pgTable(
+  "recommendation_categories",
+  {
+    recommendationId: uuid("recommendation_id")
+      .notNull()
+      .references(() => recommendations.id, { onDelete: "cascade" }),
     categoryId: uuid("category_id")
       .notNull()
       .references(() => categories.id, { onDelete: "cascade" }),
   },
   (table) => ({
-    uniquePair: uniqueIndex("product_categories_unique").on(
-      table.productId,
+    uniquePair: uniqueIndex("recommendation_categories_unique").on(
+      table.recommendationId,
       table.categoryId,
     ),
   }),
 );
 
-export const productTags = pgTable(
-  "product_tags",
+export const recommendationTags = pgTable(
+  "recommendation_tags",
   {
-    productId: uuid("product_id")
+    recommendationId: uuid("recommendation_id")
       .notNull()
-      .references(() => products.id, { onDelete: "cascade" }),
+      .references(() => recommendations.id, { onDelete: "cascade" }),
     tagId: uuid("tag_id")
       .notNull()
       .references(() => tags.id, { onDelete: "cascade" }),
   },
   (table) => ({
-    uniquePair: uniqueIndex("product_tags_unique").on(table.productId, table.tagId),
+    uniquePair: uniqueIndex("recommendation_tags_unique").on(
+      table.recommendationId,
+      table.tagId,
+    ),
+  }),
+);
+
+export const productLinks = pgTable(
+  "product_links",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    marketplaceId: uuid("marketplace_id")
+      .notNull()
+      .references(() => marketplaces.id),
+    externalId: varchar("external_id", { length: 150 }),
+    label: text("label"),
+    destinationUrl: text("destination_url").notNull(),
+    affiliateUrl: text("affiliate_url"),
+    redirectCode: varchar("redirect_code", { length: 32 }).notNull().unique(),
+    displayPrice: numeric("display_price", { precision: 12, scale: 2 }),
+    currency: varchar("currency", { length: 3 }),
+    isPrimary: boolean("is_primary").default(false).notNull(),
+    status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+    ...timestamps,
+  },
+  (table) => ({
+    statusCheck: check(
+      "product_links_status_check",
+      sql`${table.status} IN ('ACTIVE', 'INACTIVE', 'BROKEN')`,
+    ),
   }),
 );
 
@@ -158,10 +221,15 @@ export const media = pgTable(
   "media",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    productId: uuid("product_id").references(() => products.id, { onDelete: "cascade" }),
-    recommendationId: uuid("recommendation_id").references(() => recommendations.id, {
+    productId: uuid("product_id").references(() => products.id, {
       onDelete: "cascade",
     }),
+    recommendationId: uuid("recommendation_id").references(
+      () => recommendations.id,
+      {
+        onDelete: "cascade",
+      },
+    ),
     url: text("url").notNull(),
     altText: text("alt_text"),
     position: integer("position").default(0).notNull(),
@@ -182,35 +250,32 @@ export const favorites = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    productId: uuid("product_id").references(() => products.id, { onDelete: "cascade" }),
-    recommendationId: uuid("recommendation_id").references(() => recommendations.id, {
-      onDelete: "cascade",
-    }),
+    recommendationId: uuid("recommendation_id")
+      .references(() => recommendations.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
     ...timestamps,
   },
   (table) => ({
-    userProductUnique: uniqueIndex("favorites_user_product_unique").on(
-      table.userId,
-      table.productId,
-    ),
-    userRecommendationUnique: uniqueIndex("favorites_user_recommendation_unique").on(
-      table.userId,
-      table.recommendationId,
-    ),
-    singleTargetConstraint: check(
-      "favorites_single_target_check",
-      sql`((${table.productId} IS NOT NULL AND ${table.recommendationId} IS NULL) OR (${table.productId} IS NULL AND ${table.recommendationId} IS NOT NULL))`,
-    ),
+    userRecommendationUnique: uniqueIndex(
+      "favorites_user_recommendation_unique",
+    ).on(table.userId, table.recommendationId),
   }),
 );
 
 export const analyticsEvents = pgTable("analytics_events", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => users.id),
-  recommendationId: uuid("recommendation_id").references(() => recommendations.id),
+  recommendationId: uuid("recommendation_id").references(
+    () => recommendations.id,
+  ),
   productId: uuid("product_id").references(() => products.id),
   eventType: varchar("event_type", { length: 80 }).notNull(),
-  payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default({}),
+  payload: jsonb("payload")
+    .$type<Record<string, unknown>>()
+    .notNull()
+    .default({}),
   ...timestamps,
 });
 
@@ -220,23 +285,26 @@ export const adminAuditLogs = pgTable("admin_audit_logs", {
   action: varchar("action", { length: 120 }).notNull(),
   targetType: varchar("target_type", { length: 120 }).notNull(),
   targetId: varchar("target_id", { length: 120 }).notNull(),
-  metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+  metadata: jsonb("metadata")
+    .$type<Record<string, unknown>>()
+    .notNull()
+    .default({}),
   ...timestamps,
 });
 
 export const productsRelations = relations(products, ({ many, one }) => ({
-  marketplace: one(marketplaces, {
-    fields: [products.marketplaceId],
-    references: [marketplaces.id],
-  }),
   recommendations: many(recommendations),
+  links: many(productLinks),
   media: many(media),
 }));
 
-export const recommendationsRelations = relations(recommendations, ({ many, one }) => ({
-  product: one(products, {
-    fields: [recommendations.productId],
-    references: [products.id],
+export const recommendationsRelations = relations(
+  recommendations,
+  ({ many, one }) => ({
+    product: one(products, {
+      fields: [recommendations.productId],
+      references: [products.id],
+    }),
+    media: many(media),
   }),
-  media: many(media),
-}));
+);

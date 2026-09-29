@@ -15,6 +15,7 @@
 Use the stack defined in `06-technical-architecture.md`.
 
 Version policy:
+
 - use current stable mutually compatible packages
 - avoid unnecessary pre-release packages
 - commit exactly one package-manager lockfile
@@ -23,6 +24,7 @@ Version policy:
 ## Local prerequisites
 
 Expected:
+
 - current supported Node.js LTS/current compatible release
 - one chosen package manager
 - Docker/Desktop or accessible PostgreSQL
@@ -63,6 +65,7 @@ Exact command prefixes depend on the selected package manager, but the capabilit
 ## Environment variables
 
 Rules:
+
 - `.env*` secrets are never committed
 - `.env.example` documents required keys without real credentials
 - validate environment at startup/build using Zod or equivalent
@@ -71,6 +74,7 @@ Rules:
 - production and preview/staging credentials are isolated
 
 Expected configuration groups:
+
 - application URL/environment
 - public brand name
 - PostgreSQL
@@ -96,6 +100,7 @@ The exact code can differ, but GoodStash → GoodStuff must remain cheap.
 ## Git / branching / PR strategy
 
 Recommended:
+
 - protected `main`
 - short-lived feature branches
 - one coherent story/slice per PR where practical
@@ -110,6 +115,7 @@ Recommended:
 Do not merge when required CI is red.
 
 PR description should include:
+
 - scope
 - Story/Requirement IDs
 - UI evidence when visual
@@ -121,6 +127,7 @@ PR description should include:
 ## Coding standards
 
 ### TypeScript
+
 - strict mode
 - avoid `any` unless justified
 - use explicit domain types/schemas
@@ -128,6 +135,7 @@ PR description should include:
 - do not trust client-supplied roles/user IDs
 
 ### React / Next.js
+
 - prefer Server Components for read-heavy public rendering where appropriate
 - use Client Components only when interaction/state requires them
 - keep data/domain operations out of presentation components
@@ -135,6 +143,7 @@ PR description should include:
 - public metadata generated server-side
 
 ### Forms/commands
+
 - validate both shape and business rules
 - return typed/domain-friendly errors
 - user-visible errors never expose raw stack traces/SQL/provider secrets
@@ -142,6 +151,7 @@ PR description should include:
 ## Error categories
 
 Use consistent typed error categories, for example:
+
 - `VALIDATION_ERROR`
 - `UNAUTHENTICATED`
 - `FORBIDDEN`
@@ -165,7 +175,10 @@ Exact names may differ; consistency matters.
 8. verify
 9. promote to production through controlled release
 
+Drizzle migrations are forward-only in this repository. Before production migration, take a backup and verify that it can be restored. If a migration fails, stop promotion and preserve the database and migration ledger for diagnosis. Prefer a reviewed forward correction; if rollback is required, restore the verified pre-migration backup under the incident/recovery plan and reconcile writes made after that restore point. Never rewrite a migration already published to a shared branch unless every affected environment is proven unused. A data conversion that cannot be mapped without guessing must stop with a clear error and be resolved before deployment.
+
 Rules:
+
 - no silent production schema drift
 - review destructive operations/defaults/indexes/backfills
 - separate large backfills from risky schema DDL
@@ -175,6 +188,7 @@ Rules:
 ## Seed data
 
 Development seed data must be:
+
 - deterministic
 - non-sensitive
 - reset-safe
@@ -204,6 +218,7 @@ Separate essential bootstrap data (e.g. marketplaces/taxonomy) from demo content
 `/go/[code]` is a critical commercial-intent path.
 
 It must:
+
 - resolve an internal stable code
 - reject invalid/inactive links
 - validate destination
@@ -216,14 +231,18 @@ Do not accept arbitrary external URL query parameters as redirect targets.
 ## Testing strategy
 
 ### Unit
+
 Use for:
+
 - domain validation
 - state transitions
 - slug/redirect helpers
 - ranking/helper logic
 
 ### Integration
+
 Use for:
+
 - database uniqueness/constraints
 - Favorite idempotency
 - publish validation
@@ -231,7 +250,9 @@ Use for:
 - redirect resolution/event persistence
 
 ### E2E
+
 At minimum automate critical Phase 1 paths:
+
 1. Admin draft → publish → public detail
 2. Guest Save → auth → saved
 3. User opens My Stash
@@ -244,6 +265,7 @@ Tests use deterministic non-sensitive data.
 ## CI
 
 Every PR should run:
+
 - install with lockfile integrity
 - lint
 - typecheck
@@ -255,6 +277,7 @@ Add E2E when the test environment becomes available; critical flows must be part
 ## Environment promotion
 
 Suggested order:
+
 1. Local
 2. PR Preview
 3. Staging/integration
@@ -265,6 +288,7 @@ Production changes should come from reviewed, reproducible commits—not manual 
 ## Observability
 
 Before production:
+
 - structured server logging
 - correlation/request context where practical
 - redirect errors traceable
@@ -273,6 +297,7 @@ Before production:
 - selected error monitoring approach before staging UAT
 
 Never log:
+
 - passwords
 - auth secrets
 - access tokens
@@ -282,6 +307,7 @@ Never log:
 ## Sprint 0 exit checklist
 
 Sprint 0 is complete only when:
+
 - Next.js/TypeScript app starts from a fresh clone
 - documented install/setup works
 - env validation exists
@@ -301,6 +327,7 @@ The preferred first end-to-end proof is:
 > Admin Draft → Publish → Public Recommendation Detail
 
 Implement in this order:
+
 1. Brand/Product/Taxonomy
 2. Recommendation model
 3. Recommendation editor

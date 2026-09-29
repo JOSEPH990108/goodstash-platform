@@ -9,8 +9,23 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: goodstash
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d goodstash"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/goodstash
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/goodstash
       BETTER_AUTH_SECRET: ci-local-secret
       BETTER_AUTH_URL: http://localhost:3000
 
@@ -26,6 +41,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Apply Drizzle migrations to fresh PostgreSQL
+        run: npm run db:migrate
 
       - name: Lint
         run: npm run lint
