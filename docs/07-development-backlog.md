@@ -36,7 +36,7 @@
 ### S1 — Content core & Admin authoring
 - **Goal:** Admin can create canonical Products and draft/publish curated Recommendations.
 - **Exit criterion:** One Recommendation can be created in Admin and published to a stable public URL.
-- **Planned stories:** DEV-020, DEV-021, DEV-022, DEV-023, DEV-030, DEV-031, DEV-032, DEV-033, DEV-090, DEV-091, DEV-092
+- **Planned stories:** DEV-010, DEV-011, DEV-012, DEV-020, DEV-021, DEV-022, DEV-023, DEV-030, DEV-031, DEV-032, DEV-033, DEV-090, DEV-091, DEV-092
 - Every sprint must end with a working increment in preview/staging, not documentation-only completion.
 
 ### S2 — Consumer discovery & media
@@ -48,7 +48,7 @@
 ### S3 — Authentication & Favorites
 - **Goal:** Introduce identity where it creates user value: saving.
 - **Exit criterion:** Guest Save → Auth → Saved and My Stash work end-to-end.
-- **Planned stories:** DEV-010, DEV-011, DEV-012, DEV-013, DEV-060, DEV-061, DEV-062, DEV-063
+- **Planned stories:** DEV-013, DEV-014, DEV-060, DEV-061, DEV-062, DEV-063
 - Every sprint must end with a working increment in preview/staging, not documentation-only completion.
 
 ### S4 — Marketplace intent & analytics
@@ -72,17 +72,18 @@
 | DEV-003 | E0 | Create database migration workflow | Drizzle migrations can be generated/applied in non-prod and production with documented rollback procedure. | P0 | 5 | S0 | DEV-001 |
 | DEV-004 | E0 | Implement shared design tokens and app shells | GoodStash tokens power consumer/admin shells; wordmark can swap to GoodStuff without layout changes. | P0 | 5 | S0 | DEV-001 |
 | DEV-005 | E0 | Add structured logging and error boundary baseline | Server errors have traceable logs; user-facing failures render safe fallback UI. | P0 | 3 | S0 | DEV-001 |
-| DEV-010 | E1 | Integrate provider-agnostic authentication boundary | Session and user identity work independently of final provider choice. | P0 | 5 | S3 | DEV-003 |
-| DEV-011 | E1 | Implement roles and protected admin routes | Non-admin users cannot access admin routes or admin actions; server checks are authoritative. | P0 | 3 | S3 | DEV-010 |
-| DEV-012 | E1 | Implement user status handling | Disabled users cannot create sessions or access protected actions; existing session policy is defined. | P0 | 2 | S3 | DEV-010 |
-| DEV-013 | E1 | Implement account profile basics | Registered user can view/update supported profile fields and sign out. | P0 | 3 | S3 | DEV-010 |
+| DEV-010 | E1 | Integrate provider-agnostic authentication boundary for Admin | Session and user identity support protected Admin work independently of the final provider choice. | P0 | 5 | S1 | DEV-003 |
+| DEV-011 | E1 | Implement Admin roles and protected routes/actions | Non-admin users cannot access Admin routes or actions; server checks are authoritative. | P0 | 3 | S1 | DEV-010 |
+| DEV-012 | E1 | Implement Admin user status enforcement | Suspended/disabled users cannot access protected Admin actions; session policy is defined. | P0 | 2 | S1 | DEV-010 |
+| DEV-013 | E1 | Implement consumer authentication UX | Provider-agnostic sign-in/sign-out/session UX supports the registered-user consumer journey. | P0 | 3 | S3 | DEV-010 |
+| DEV-014 | E1 | Implement consumer account profile basics | Registered users can view/update supported profile fields and sign out. | P0 | 3 | S3 | DEV-013 |
 | DEV-020 | E2 | Create Product entity and CRUD service | Product supports brand, slug, name, status and timestamps with validation. | P0 | 5 | S1 | DEV-003 |
-| DEV-021 | E2 | Create Brand entity and admin management | Admin can create/edit/archive brands; duplicate slugs are prevented. | P0 | 3 | S1 | DEV-003 |
-| DEV-022 | E2 | Create Categories and Tags taxonomy | Admin manages controlled categories and flexible tags; products/recommendations can associate as specified. | P0 | 5 | S1 | DEV-003 |
+| DEV-021 | E2 | Create Brand entity and admin management | Admin can create/edit/archive brands; duplicate slugs are prevented. | P0 | 3 | S1 | DEV-003,DEV-011 |
+| DEV-022 | E2 | Create Categories and Tags taxonomy | Admin manages controlled categories and flexible tags; products/recommendations can associate as specified. | P0 | 5 | S1 | DEV-003,DEV-011 |
 | DEV-023 | E2 | Implement status and slug uniqueness rules | Published URLs remain unique/stable and invalid status transitions are rejected. | P0 | 3 | S1 | DEV-020 |
-| DEV-030 | E3 | Create Recommendation entity linked to Product | A Product can have multiple Recommendations; Recommendation has author, slug, status and content fields. | P0 | 5 | S1 | DEV-020 |
+| DEV-030 | E3 | Create Recommendation entity linked to Product | A Product can have multiple Recommendations; Recommendation has author, slug, status and content fields. | P0 | 5 | S1 | DEV-020,DEV-010 |
 | DEV-031 | E3 | Implement recommendation editor data model | Supports headline, summary, body, why-recommended, pros, cons, best-for and optional price reference. | P0 | 5 | S1 | DEV-030 |
-| DEV-032 | E3 | Implement draft → preview → publish workflow | Draft is not public; preview is admin-only; publish validates required fields and produces public URL. | P0 | 5 | S1 | DEV-030 |
+| DEV-032 | E3 | Implement draft → preview → publish workflow | Draft is not public; preview is admin-only; publish validates required fields and produces public URL. | P0 | 5 | S1 | DEV-030,DEV-011 |
 | DEV-033 | E3 | Implement archive/unpublish behavior | Unpublished content disappears from public discovery while admin history remains. | P0 | 3 | S1 | DEV-032 |
 | DEV-034 | E3 | Implement featured/editorial placement flags | Admin can mark featured items and define deterministic ordering/fallback. | P0 | 3 | S2 | DEV-032 |
 | DEV-040 | E4 | Build mobile-first Home page | Home renders hero, featured, latest/popular blocks and category entry points from published data. | P0 | 5 | S2 | DEV-032,DEV-034 |
@@ -95,7 +96,7 @@
 | DEV-052 | E5 | Add search ranking and typo tolerance baseline | Results prioritize title/brand exact matches; trigram/FTS fallback handles common typos within performance target. | P0 | 5 | S5 | DEV-050 |
 | DEV-060 | E6 | Create Favorites schema and uniqueness constraint | A user can favorite a recommendation once; duplicate action is idempotent. | P0 | 3 | S3 | DEV-003,DEV-030 |
 | DEV-061 | E6 | Implement save/unsave interactions | Authenticated save state updates correctly across card/detail/favorites views. | P0 | 5 | S3 | DEV-060 |
-| DEV-062 | E6 | Implement guest save → authentication → resume | Guest save triggers auth; after successful auth the intended item is saved exactly once and user returns to context. | P0 | 5 | S3 | DEV-010,DEV-061 |
+| DEV-062 | E6 | Implement guest save → authentication → resume | Guest save triggers consumer auth; after successful auth the intended item is saved exactly once and user returns to context. | P0 | 5 | S3 | DEV-013,DEV-061 |
 | DEV-063 | E6 | Build My Stash / Favorites page | User can view saved recommendations with empty state and open/remove items. | P0 | 5 | S3 | DEV-061 |
 | DEV-070 | E7 | Create Marketplace and ProductLink models | One product can have multiple marketplace links with status, currency, price reference and primary flag. | P0 | 5 | S4 | DEV-020 |
 | DEV-071 | E7 | Implement admin marketplace-link management | Admin can add, edit, disable and reprioritize links; invalid URLs are rejected. | P0 | 5 | S4 | DEV-070,DEV-090 |
